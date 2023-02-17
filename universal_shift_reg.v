@@ -1,5 +1,5 @@
 module uni_shift_reg(input [1:0] select,input MSB_in, LSB_in, clk, reset, input [7:0] in, output reg [7:0] out);
-always@ (posedge clk, reset, select)
+always@ (posedge clk)
 begin
 if(reset)
 	out <= 8'b00000000;
