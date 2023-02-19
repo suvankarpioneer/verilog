@@ -1,51 +1,46 @@
 `timescale 1ns / 1ps
 
-module uni_shift_reg(input start, clk, reset, input [7:0] in, output reg outgoing);
+module uni_shift_reg(input start, clk, input [7:0] in, output reg outgoing, input recieve );
 reg [1:0] select;
-localparam IDLE = 2'b00,
-           LOAD = 2'b10,
-           SEND = 2'b11;
+localparam LOAD = 2'b01,
+           SEND = 2'b10;
+           
 reg par;
 reg [4:0] count;
 reg [7:0] out;
 always@ (negedge clk)
 begin
-if(reset) begin
-outgoing <= 1'bx; 
+if(start) begin
+outgoing <= 1'b1; 
 out <= 0; 
 select <= 2'bxx;
 end
 else begin
-    if(!start)
-	   begin
 	   par <= in[7]^in[6]^in[5]^in[4]^in[3]^in[2]^in[1]^in[0];
-	   select<= IDLE;
+	   select<= LOAD;
+	   outgoing <=1'b1;
 	   count <= 0;
 		case (select)
-			IDLE: begin outgoing <= 1'bx;
-			            select <= LOAD;
-			      end
 			LOAD: begin out <= in;
 			            select <= SEND;
+			            outgoing <= 1'b0;
 			      end
 			         
 			SEND: begin
-			            if(count != 4'b1000) begin
+			            if(count != 4'b1001) begin
 			                 count <= count+1; 
 			                 outgoing <= out[0];
 			                 out <= {par,out[7:1]};
 			                 select <= SEND;
 			                 end
-			            else select <= IDLE;
-			      end
+			            else outgoing <= 1'b1;
+			      end 
+			
+			      
 		endcase
 		end
-		 else  begin
-                outgoing <= 1'bx; 
-                out <= 0; 
-                select <= 2'bxx;
-                end
-		end
+		 
+		
 	   
 end
 	
