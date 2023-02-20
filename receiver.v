@@ -1,69 +1,52 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 20.02.2023 00:40:39
-// Design Name: 
-// Module Name: receiver
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module receiver(
-input in, clk, output [7:0] out
+input in, clk, output reg [7:0] out
     );
 reg [1:0] state;
 reg [8:0] temp;
 reg par ;
+reg resend;
 reg [3:0] count;
-localparam START = 2'b00;
+localparam IDLE = 2'b00,
+           START = 2'b01,
+           GENERATE = 2'b10,
+           COMPARE = 2'b11;
+          
 always @(negedge clk)
 begin
-    if(!in) begin
-        state <= START;
-        count <= 0;
-        case(state)
-            START: begin if (count != 4'b1001)
+    count <= 0;
+    state <= IDLE;
+    case(state)
+    IDLE: begin
+        if(!in)begin
+            state <= START;
+            temp <= 9'bxxxxxxxxx;
+        end
+    end
+    START: begin if (count != 4'b1001)
                             begin
                             count <= count + 1;
                             temp[count]<=in;
                             state <= START;
                             end
-                         
-                         
-                   end
-        endcase
-    end
+                 else begin
+                        par <= temp[7]^temp[6]^temp[5]^temp[4]^temp[3]^temp[2]^temp[1]^temp[0];     
+                        state <= COMPARE;  
+                      end   
+           end 
+            
+    COMPARE: begin 
+                if(temp[8]==par) begin
+                                     out <= temp;
+                                     state <= IDLE;
+                                 end
+                else begin resend<= 1'b1;
+                           out <= 8'bxxxxxxxx;
+                           state <= IDLE;
+                     end
+             
+             end
+                   
+    endcase
 end
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 endmodule
