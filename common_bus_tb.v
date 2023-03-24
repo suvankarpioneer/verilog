@@ -52,6 +52,8 @@ module commonBus_tb(
         #33 LD[3] = 1'b1;     //keeping LD[3](for bus to acc.) high and select at 100(for acc. to bus ) at all times will make the
                               //values toggle between acc. and bus
         #36 LD[3] = 1'b0;
+        #41 CLR[2]<= 1'b0;
+        #41 INR[2]<= 1'b1;
     join
     
 endmodule
