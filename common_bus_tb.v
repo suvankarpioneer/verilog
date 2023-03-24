@@ -29,7 +29,7 @@ module commonBus_tb(
     reg [15:0] data_in;
     reg enable;
     wire [15:0] data_out;
-    localparam stoptime = 50;
+    localparam stoptime = 70;
     common_bus cb1(.clock(clock), .read(read), .write(write), .LD(LD), .INR(INR), .CLR(CLR) ,
     .select(select), .data_in(data_in), .enable(enable), .data_out(data_out) );
     initial #stoptime $finish;
