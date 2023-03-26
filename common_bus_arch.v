@@ -20,9 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module common_bus_arch(
+module common_bus(
 input clock, read, write, input [5:0] LD, input [4:0] INR, CLR , 
-input [2:0] select 
+input [2:0] select, 
+input [15:0] data_in, // from external memory to the local memory
+output reg [15:0] data_out, // to send data to the ALU
+input enable //to enable data output
     );
     reg [15:0] main_memory [4095:0];
     reg [11:0] program_counter;
@@ -45,7 +48,7 @@ input [2:0] select
   
     
         case (select)
-            3'b000: bus <= 4'h0000;
+            3'b000: bus <= data_in;
             3'b001: bus <=address_reg;                      //0 for address reg
             3'b010: bus <=program_counter;                  //1 for PC
             3'b011: bus <=data_reg;                         //2 for DR
@@ -59,8 +62,9 @@ input [2:0] select
    
     always @(negedge clock)
     begin
-    addr_bus<=address_reg;
-        if(LD[0]) address_reg<=bus;
+    
+        if(LD[0]) begin address_reg<=bus; 
+                        addr_bus<=address_reg; end
         if(LD[1]) program_counter<=bus;
         if(LD[2]) data_reg<=bus;
         if(LD[3]) accumulator<=bus;
@@ -76,9 +80,10 @@ input [2:0] select
         if(INR[2]) data_reg<=data_reg+1;
         if(INR[3]) accumulator<=accumulator+1;
         if(INR[4]) temporary_register<=temporary_register+1;
+        if (enable) data_out<= bus;
         if(read)
             data_bus<=main_memory[addr_bus];
         if(write)
-            main_memory[addr_bus]<=data_bus;
+            main_memory[addr_bus]<=bus;
     end
 endmodule
